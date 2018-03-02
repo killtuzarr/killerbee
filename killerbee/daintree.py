@@ -23,7 +23,17 @@ class DainTreeDumper:
         This method is a wrapper around the pwrite() method for compatibility
         with the PcapDumper.pcap_dump method.
         '''
-        self.pwrite(packet)
+        channel = 26
+        rssi = 0
+        new_packet = packet
+
+        if len(packet) > 11 :
+            if packet[0:5] == b"\x5a\x42\x4f\x53\x53":    #ZBOSS dump header signature
+                zboss_header = bytearray(packet[5:12])
+                channel = zboss_header[1]
+                new_packet = packet[11:]
+
+        self.pwrite(new_packet, channel, rssi)
 
     def pwrite(self, packet, channel=26, rssi=0):
         '''
